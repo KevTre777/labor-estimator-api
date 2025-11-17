@@ -1,0 +1,19 @@
+{
+  "name": "labor-estimator-api",
+  "version": "1.0.0",
+  "description": "Labor hour estimator API for auto repair shops",
+  "main": "api/labor-estimate.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.3.0",
+    "vercel": "^33.0.0"
+  }
+}
