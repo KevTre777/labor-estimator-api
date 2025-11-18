@@ -35,6 +35,19 @@
         <div class="subtitle">Labor Estimate Calculator</div>
         
         <form id="estimatorForm">
+                        <!-- VIN Decoder Section -->
+            <div class="vin-section">
+                <div class="form-group">
+                    <label for="vin">🔍 Quick VIN Lookup (Optional)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="vin" name="vin" placeholder="Enter 17-digit VIN" maxlength="17" style="flex: 1;">
+                        <button type="button" id="decodeBtn" style="width: auto; padding: 0 20px; margin: 0;">Decode VIN</button>
+                    </div>
+                    <small style="color: #888; font-size: 12px;">Or enter vehicle info manually below</small>
+                </div>
+            </div>
+            <div style="margin: 20px 0; border-top: 1px solid #e0e0e0;"></div>
+
             <div class="form-group">
                 <label for="year">Vehicle Year</label>
                 <input type="number" id="year" name="year" required min="1900" max="2030" placeholder="2020">
@@ -83,6 +96,55 @@
         const form = document.getElementById('estimatorForm');
         const resultsDiv = document.getElementById('results');
         const submitBtn = document.getElementById('submitBtn');
+
+            // VIN Decoder functionality
+    const vinInput = document.getElementById('vin');
+    const decodeBtn = document.getElementById('decodeBtn');
+    const yearInput = document.getElementById('year');
+    const makeInput = document.getElementById('make');
+    const modelInput = document.getElementById('model');
+
+    decodeBtn.addEventListener('click', async () => {
+        const vin = vinInput.value.trim();
+        
+        if (vin.length !== 17) {
+            alert('⚠️ Please enter a valid 17-digit VIN');
+            return;
+        }
+
+        decodeBtn.disabled = true;
+        decodeBtn.textContent = 'Decoding...';
+
+        try {
+            const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+            const data = await response.json();
+            
+            if (data.Results) {
+                const results = data.Results;
+                
+                // Extract year, make, model from NHTSA response
+                const year = results.find(r => r.Variable === 'Model Year')?.Value || '';
+                const make = results.find(r => r.Variable === 'Make')?.Value || '';
+                const model = results.find(r => r.Variable === 'Model')?.Value || '';
+                
+                if (year && make && model) {
+                    yearInput.value = year;
+                    makeInput.value = make;
+                    modelInput.value = model;
+                    alert('✅ VIN decoded successfully!');
+                } else {
+                    alert('⚠️ Could not decode VIN. Please enter vehicle info manually.');
+                }
+            }
+        } catch (error) {
+            alert('❌ Error decoding VIN. Please try again or enter manually.');
+            console.error('VIN decode error:', error);
+        } finally {
+            decodeBtn.disabled = false;
+            decodeBtn.textContent = 'Decode VIN';
+        }
+    });
+
         
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
