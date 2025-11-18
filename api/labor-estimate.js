@@ -86,6 +86,8 @@ export default async function handler(req, res) {
             shop_rate,
             suggested_labor_price: suggestedLaborPrice.toFixed(2),
             parts_cost_estimate: partsEstimate.toFixed(2),
+                        parts_cost_low: partsCost ? partsCost.low : 0,
+                        parts_cost_high: partsCost ? partsCost.high : 0,
             total_estimate: totalEstimate.toFixed(2),
             data_source: 'VehicleDatabases'
           });
