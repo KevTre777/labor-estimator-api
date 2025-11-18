@@ -190,6 +190,7 @@
 
                             // Use actual parts cost if provided, otherwise use API estimate
             const finalPartsCost = (actualPartsCost && actualPartsCost.trim() !== '' && parseFloat(actualPartsCost) > 0) ? parseFloat(actualPartsCost) : (data.parts_cost_estimate || 0);                
+                            const finalTotalEstimate = parseFloat(data.suggested_labor_price) + finalPartsCost;
                 resultsDiv.innerHTML = `
                     <h2>💰 Estimate Results</h2>
                     <div class="result-item">
