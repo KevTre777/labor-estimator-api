@@ -189,8 +189,7 @@
                 }
 
                             // Use actual parts cost if provided, otherwise use API estimate
-            const finalPartsCost = (actualPartsCost && actualPartsCost.trim() !== '' && parseFloat(actualPartsCost) > 0) ? parseFloat(actualPartsCost) : (data.estimated_parts_cost || 0);                            const finalTotalEstimate = data.total_labor_cost + finalPartsCost;
-                
+            const finalPartsCost = (actualPartsCost && actualPartsCost.trim() !== '' && parseFloat(actualPartsCost) > 0) ? parseFloat(actualPartsCost) : (data.parts_cost_estimate || 0);                
                 resultsDiv.innerHTML = `
                     <h2>💰 Estimate Results</h2>
                     <div class="result-item">
@@ -203,11 +202,11 @@
                     </div>
                     <div class="result-item">
                         <span class="result-label">Labor Hours:</span>
-                        <span class="result-value">${data.estimated_labor_hours} hrs</span>
+                        <span class="result-value">${data.labor_hours_recommended} hrs</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Labor Cost:</span>
-                        <span class="result-value">$${data.total_labor_cost}</span>
+                        <span class="result-value">$${data.suggested_labor_price}</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Parts Cost:</span>
