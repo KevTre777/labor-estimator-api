@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Specs
-    <styleNumber(finalPartsCost).toFixed(2)
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Specs</title>
+
+    <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px; width: 100%; padding: 40px; }
@@ -25,17 +26,17 @@
         .result-label { color: #666; }
         .result-value { color: #333; font-weight: 600; }
         .total { color: #667eea !important; }
-        .error { background: #fee; border-left-color: #f44; color: #c33; }
+        .error { background: #fee; border-left-color: #f44; color: #c33; display: block; }
         .loading { text-align: center; color: #666; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔧 Connect Specs
+        <h1>🔧 Connect Specs</h1>
         <div class="subtitle">Labor Estimate Calculator</div>
         
         <form id="estimatorForm">
-                        <!-- VIN Decoder Section -->
+            <!-- VIN Decoder Section -->
             <div class="vin-section">
                 <div class="form-group">
                     <label for="vin">🔍 Quick VIN Lookup (Optional)</label>
@@ -46,11 +47,12 @@
                     <small style="color: #888; font-size: 12px;">Or enter vehicle info manually below</small>
                 </div>
             </div>
+
             <div style="margin: 20px 0; border-top: 1px solid #e0e0e0;"></div>
 
             <div class="form-group">
                 <label for="year">Vehicle Year</label>
-                <input type="number" id="year" name="year" required min="1900" max="2030" placeholder="2020">
+                <input type="number" id="year" name="year" required min="1900" max="2035" placeholder="2020">
             </div>
             
             <div class="form-group">
@@ -77,7 +79,7 @@
                     <option value="air-filter-replacement">Air Filter Replacement</option>
                     <option value="timing-belt-replacement">Timing Belt Replacement</option>
                     <option value="wheel-alignment">Wheel Alignment</option>
-                                        <option value="other">Other (Custom Service)</option>
+                    <option value="other">Other (Custom Service)</option>
                 </select>
             </div>
             
@@ -86,17 +88,16 @@
                 <input type="number" id="shopRate" name="shopRate" required value="145" step="0.01" placeholder="145.00">
             </div>
 
-                        <div class="form-group">
+            <div class="form-group">
                 <label for="actualPartsCost">💵 Actual Parts Cost (Optional)</label>
                 <input type="number" id="actualPartsCost" name="actualPartsCost" step="0.01" placeholder="0.00">
                 <small style="color: #888; font-size: 12px;">Leave blank to use API estimate</small>
             </div>
 
-            
             <button type="submit" id="submitBtn">Calculate Estimate</button>
         </form>
         
-        <div id="results" class="results"></div>
+        <div id="results" class="results" aria-live="polite"></div>
     </div>
     
     <script>
@@ -104,71 +105,73 @@
         const resultsDiv = document.getElementById('results');
         const submitBtn = document.getElementById('submitBtn');
 
-            // VIN Decoder functionality
-    const vinInput = document.getElementById('vin');
-    const decodeBtn = document.getElementById('decodeBtn');
-    const yearInput = document.getElementById('year');
-    const makeInput = document.getElementById('make');
-    const modelInput = document.getElementById('model');
+        // VIN Decoder elements
+        const vinInput = document.getElementById('vin');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const yearInput = document.getElementById('year');
+        const makeInput = document.getElementById('make');
+        const modelInput = document.getElementById('model');
 
-    decodeBtn.addEventListener('click', async () => {
-        const vin = vinInput.value.trim();
-        
-        if (vin.length !== 17) {
-            alert('⚠️ Please enter a valid 17-digit VIN');
-            return;
-        }
-
-        decodeBtn.disabled = true;
-        decodeBtn.textContent = 'Decoding...';
-
-        try {
-            const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
-            const data = await response.json();
+        decodeBtn.addEventListener('click', async () => {
+            const vin = vinInput.value.trim();
             
-            if (data.Results) {
-                const results = data.Results;
-                
-                // Extract year, make, model from NHTSA response
-                const year = results.find(r => r.Variable === 'Model Year')?.Value || '';
-                const make = results.find(r => r.Variable === 'Make')?.Value || '';
-                const model = results.find(r => r.Variable === 'Model')?.Value || '';
-                
-                if (year && make && model) {
-                    yearInput.value = year;
-                    makeInput.value = make;
-                    modelInput.value = model;
-                    alert('✅ VIN decoded successfully!');
-                } else {
-                    alert('⚠️ Could not decode VIN. Please enter vehicle info manually.');
-                }
+            if (vin.length !== 17) {
+                alert('⚠️ Please enter a valid 17-digit VIN');
+                return;
             }
-        } catch (error) {
-            alert('❌ Error decoding VIN. Please try again or enter manually.');
-            console.error('VIN decode error:', error);
-        } finally {
-            decodeBtn.disabled = false;
-            decodeBtn.textContent = 'Decode VIN';
-        }
-    });
 
-        
+            decodeBtn.disabled = true;
+            const original = decodeBtn.textContent;
+            decodeBtn.textContent = 'Decoding...';
+
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+                const data = await response.json();
+                
+                if (data.Results) {
+                    const results = data.Results;
+                    
+                    const year = results.find(r => r.Variable === 'Model Year')?.Value || '';
+                    const make = results.find(r => r.Variable === 'Make')?.Value || '';
+                    const model = results.find(r => r.Variable === 'Model')?.Value || '';
+                    
+                    if (year && make && model) {
+                        yearInput.value = year;
+                        makeInput.value = make;
+                        modelInput.value = model;
+                        alert('✅ VIN decoded successfully!');
+                    } else {
+                        alert('⚠️ Could not decode VIN completely. Please enter vehicle info manually.');
+                    }
+                } else {
+                    alert('⚠️ Unexpected response from VIN decoder.');
+                }
+            } catch (error) {
+                alert('❌ Error decoding VIN. Please try again or enter manually.');
+                console.error('VIN decode error:', error);
+            } finally {
+                decodeBtn.disabled = false;
+                decodeBtn.textContent = original;
+            }
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const year = document.getElementById('year').value;
-            const make = document.getElementById('make').value;
-            const model = document.getElementById('model').value;
+
+            // gather form values
+            const year = document.getElementById('year').value.trim();
+            const make = document.getElementById('make').value.trim();
+            const model = document.getElementById('model').value.trim();
             const service = document.getElementById('service').value;
-            const shopRate = document.getElementById('shopRate').value;
-                    const actualPartsCost = document.getElementById('actualPartsCost').value;
-            
+            const shopRate = parseFloat(document.getElementById('shopRate').value) || 0;
+            const actualPartsCostRaw = document.getElementById('actualPartsCost').value;
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Calculating...';
+            resultsDiv.classList.remove('error');
             resultsDiv.innerHTML = '<div class="loading">⏳ Calculating your estimate...</div>';
             resultsDiv.style.display = 'block';
-            resultsDiv.classList.remove('error');
-            
+
             try {
                 const response = await fetch('https://labor-estimator-api.vercel.app/api/labor-estimate', {
                     method: 'POST',
@@ -178,48 +181,61 @@
                         make: make,
                         model: model,
                         job_code: service,
-                        shop_rate: parseFloat(shopRate)
+                        shop_rate: shopRate
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to get estimate');
+                    throw new Error(data.error || 'Failed to get estimate from API');
                 }
 
-                            // Use actual parts cost if provided, otherwise use API estimate
-            const finalPartsCost = (actualPartsCost && actualPartsCost.trim() !== '' && parseFloat(actualPartsCost) > 0) ? parseFloat(actualPartsCost) : (data.parts_cost_estimate ? parseFloat(data.parts_cost_estimate) : 0);                            const finalTotalEstimate = parseFloat(data.suggested_labor_price) + finalPartsCost;
+                // Robust parsing + defaults
+                const suggestedLaborPrice = parseFloat(data.suggested_labor_price) || 0;
+                const laborHours = data.labor_hours_recommended ?? data.labor_hours ?? 0;
+                const apiPartsEstimate = parseFloat(data.parts_cost_estimate) || 0;
+
+                const finalPartsCost = (actualPartsCostRaw && actualPartsCostRaw.trim() !== '' && parseFloat(actualPartsCostRaw) > 0)
+                    ? parseFloat(actualPartsCostRaw)
+                    : apiPartsEstimate;
+
+                const finalTotalEstimate = (suggestedLaborPrice || 0) + (finalPartsCost || 0);
+
+                // display results (format numbers safely)
+                resultsDiv.classList.remove('error');
+                resultsDiv.style.display = 'block';
                 resultsDiv.innerHTML = `
                     <h2>💰 Estimate Results</h2>
                     <div class="result-item">
                         <span class="result-label">Vehicle:</span>
-                        <span class="result-value">${data.year} ${data.make} ${data.model}</span>
+                        <span class="result-value">${data.year || year || '—'} ${data.make || make || '—'} ${data.model || model || ''}</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Service:</span>
-                        <span class="result-value">${data.job_name}</span>
+                        <span class="result-value">${data.job_name || service || 'Custom Service'}</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Labor Hours:</span>
-                        <span class="result-value">${data.labor_hours_recommended} hrs</span>
+                        <span class="result-value">${laborHours} hrs</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Labor Cost:</span>
-                        <span class="result-value">$${data.suggested_labor_price}</span>
+                        <span class="result-value">$${(suggestedLaborPrice).toFixed(2)}</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Parts Cost:</span>
-                        <span class="result-value">$${finalPartsCost.toFixed(2)}</span>
+                        <span class="result-value">$${(finalPartsCost).toFixed(2)}</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">TOTAL ESTIMATE:</span>
-                        <span class="result-value total">$${finalTotalEstimate.toFixed(2)}</span>
+                        <span class="result-value total">$${(finalTotalEstimate).toFixed(2)}</span>
                     </div>
                 `;
-                
             } catch (error) {
+                console.error('Estimate error:', error);
                 resultsDiv.classList.add('error');
+                resultsDiv.style.display = 'block';
                 resultsDiv.innerHTML = `
                     <h2>❌ Error</h2>
                     <p>${error.message}</p>
@@ -232,4 +248,3 @@
     </script>
 </body>
 </html>
-            
